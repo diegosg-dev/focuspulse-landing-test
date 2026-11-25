@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusPulse — Calm, distraction-free focus timer for deep work</title>
+  <meta name="description" content="FocusPulse is a calm, distraction-free focus timer designed for deep work, gentle intervals, and mindful breaks." />
+  <style>
+    :root {
+      --bg: #f6f5f0;
+      --surface: #ffffff;
+      --surface-muted: #efede6;
+      --text: #181b1a;
+      --text-muted: #5a615e;
+      --accent: #2c6657;
+      --accent-hover: #225145;
+      --accent-soft: #e6f0ec;
+      --border: #e3e0d6;
+      --shadow-sm: 0 2px 10px rgba(24, 27, 26, 0.04);
+      --shadow-md: 0 18px 45px rgba(24, 27, 26, 0.08);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --max-width: 1080px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(246, 245, 240, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(227, 224, 214, 0.7);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      gap: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.08rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 0.94rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: var(--text);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .nav-cta:hover {
+      background: #2f3432;
+      transform: translateY(-1px);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 64px 0 72px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      margin-bottom: 20px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.82); }
+    }
+
+    .hero h1 {
+      margin: 0 0 18px;
+      font-size: clamp(2.15rem, 4.4vw, 3.35rem);
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+      font-weight: 750;
+    }
+
+    .hero-subtitle {
+      margin: 0 0 30px;
+      font-size: clamp(1.02rem, 1.5vw, 1.16rem);
+      color: var(--text-muted);
+      max-width: 52ch;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 46px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-size: 0.96rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-muted);
+    }
+
+    .hero-note {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Interactive Timer Card */
+    .timer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 30px 26px;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+
+    .timer-presets {
+      display: inline-flex;
+      background: var(--bg);
+      padding: 4px;
+      border-radius: 999px;
+      gap: 4px;
+      margin-bottom: 24px;
+    }
+
+    .preset-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .preset-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .timer-ring {
+      width: 204px;
+      height: 204px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, var(--bg) 62%, transparent 63%),
+                  conic-gradient(var(--accent) calc(var(--progress, 100) * 1%), var(--surface-muted) 0);
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    .timer-inner {
+      width: 174px;
+      height: 174px;
+      border-radius: 50%;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(227, 224, 214, 0.55);
+    }
+
+    .timer-display {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 2.35rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+
+    .timer-label {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .timer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .timer-controls .btn {
+      min-height: 40px;
+      padding: 8px 18px;
+      font-size: 0.88rem;
+    }
+
+    /* Sections */
+    .section {
+      padding: 72px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 580px;
+      margin: 0 auto 44px;
+    }
+
+    .section-header h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.65rem, 3vw, 2.2rem);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+    }
+
+    .section-header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 1.02rem;
+    }
+
+    /* Features */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+    }
+
+    .feature-card h3 {
+      margin: 4px 0 0;
+      font-size: 1.12rem;
+      letter-spacing: -0.015em;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Pricing */
+    .pricing-section {
+      border-top: 1px solid var(--border);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pricing-card.featured {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+
+    .plan-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .plan-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .plan-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .plan-desc {
+      margin: 0 0 20px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .plan-price {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+
+    .price-amount {
+      font-size: 2.35rem;
+      font-weight: 750;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .price-period {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .plan-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .plan-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.94rem;
+      color: var(--text);
+    }
+
+    .check-icon {
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .pricing-card .btn {
+      width: 100%;
+    }
+
+    /* Footer */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 0 44px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .footer-brand strong {
+      color: var(--text);
+      font-size: 0.98rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .hero {
+        padding: 44px 0 56px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav-links .hide-mobile {
+        display: none;
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: 56px 0;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a href="#" class="brand" aria-label="FocusPulse home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <polyline points="12 7 12 12 15 14"></polyline>
+          </svg>
+        </span>
+        <span>FocusPulse</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#features" class="hide-mobile">Features</a>
+        <a href="#pricing" class="hide-mobile">Pricing</a>
+        <a href="#pricing" class="nav-cta">Get Started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span>Calm Deep Work Timer</span>
+          </div>
+          <h1>Quiet the noise. Stay in deep work longer.</h1>
+          <p class="hero-subtitle">
+            FocusPulse is a calm, distraction-free focus timer for deep work.
+            Set a single intention, follow gentle intervals, and step away refreshed without streaks or notification fatigue.
+          </p>
+          <div class="hero-actions">
+            <a href="#pricing" class="btn btn-primary">Start Free Today</a>
+            <a href="#features" class="btn btn-secondary">Explore Features</a>
+          </div>
+          <p class="hero-note">Works offline on macOS, Windows, and web. No account required to start.</p>
+        </div>
+
+        <aside class="timer-card" aria-label="Interactive FocusPulse preview">
+          <div class="timer-presets" role="group" aria-label="Session duration presets">
+            <button type="button" class="preset-btn active" data-minutes="25" data-label="Deep Work">25m</button>
+            <button type="button" class="preset-btn" data-minutes="50" data-label="Extended Flow">50m</button>
+            <button type="button" class="preset-btn" data-minutes="10" data-label="Mindful Break">10m Break</button>
+          </div>
+
+          <div class="timer-ring" id="timerRing" style="--progress: 100;">
+            <div class="timer-inner">
+              <div class="timer-display" id="timerDisplay">25:00</div>
+              <div class="timer-label" id="timerLabel">Deep Work</div>
+            </div>
+          </div>
+
+          <div class="timer-controls">
+            <button type="button" class="btn btn-primary" id="toggleTimerBtn">Start Focus</button>
+            <button type="button" class="btn btn-secondary" id="resetTimerBtn">Reset</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <h2>Designed to protect your attention</h2>
+          <p>Every detail is pared back so your timer stays quietly out of the way while you do your best thinking.</p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v4"></path>
+                <path d="M12 18v4"></path>
+                <path d="M4.93 4.93l2.83 2.83"></path>
+                <path d="M16.24 16.24l2.83 2.83"></path>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+            </div>
+            <h3>Gentle Intervals</h3>
+            <p>Warm acoustic chimes and soft visual cues ease you in and out of focus blocks without jarring alarms.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="14" rx="3"></rect>
+                <line x1="8" y1="20" x2="16" y2="20"></line>
+              </svg>
+            </div>
+            <h3>Zero-Clutter Canvas</h3>
+            <p>No feeds, leaderboards, or guilt-inducing streaks. Just one current intention and a calm countdown.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21c4.5-3.2 7-6.8 7-10.5A7 7 0 0 0 5 10.5C5 14.2 7.5 17.8 12 21z"></path>
+                <circle cx="12" cy="10.5" r="2"></circle>
+              </svg>
+            </div>
+            <h3>Mindful Breaks</h3>
+            <p>Optional breathing prompts and eye-rest reminders between sessions keep deep work sustainable all week.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section pricing-section" id="pricing">
+      <div class="container">
+        <div class="section-header">
+          <h2>Simple, transparent pricing</h2>
+          <p>Start free with everything you need for daily deep work. Upgrade only if you want sync and soundscapes.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <div class="plan-top">
+              <h3 class="plan-name">Calm Free</h3>
+            </div>
+            <p class="plan-desc">Essential focus sessions for solo builders, writers, and students.</p>
+            <div class="plan-price">
+              <span class="price-amount">$0</span>
+              <span class="price-period">/ forever</span>
+            </div>
+            <ul class="plan-list">
+              <li>
+                <svg class="check-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Unlimited custom focus &amp; break intervals</span>
+              </li>
+              <li>
+                <svg class="check-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>3 soft acoustic completion chimes</span>
+              </li>
+              <li>
+                <svg class="check-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Offline-first desktop &amp; web timer</span>
+              </li>
+            </ul>
+            <a href="#" class="btn btn-secondary">Use Free Forever</a>
+          </div>
+
+          <div class="pricing-card featured">
+            <div class="plan-top">
+              <h3 class="plan-name">Deep Pro</h3>
+              <span class="plan-badge">Most Popular</span>
+            </div>
+            <p class="plan-desc">For creators and engineers protecting dedicated deep-work hours daily.</p>
+            <div class="plan-price">
+              <span class="price-amount">$6</span>
+              <span class="price-period">/ month</span>
+            </div>
+            <ul class="plan-list">
+              <li>
+                <svg class="check-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Everything in Calm Free</span>
+              </li>
+              <li>
+                <svg class="check-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Curated brown noise &amp; rain soundscapes</span>
+              </li>
+              <li>
+                <svg class="check-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Private session log &amp; cross-device sync</span>
+              </li>
+            </ul>
+            <a href="#" class="btn btn-primary">Start 14-Day Trial</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <strong>FocusPulse</strong>
+        <span>A calm, distraction-free focus timer for deep work.</span>
+      </div>
+      <div class="footer-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="mailto:hello@focuspulse.example">Contact</a>
+        <span>&copy; 2026 FocusPulse</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const display = document.getElementById('timerDisplay');
+      const label = document.getElementById('timerLabel');
+      const ring = document.getElementById('timerRing');
+      const toggleBtn = document.getElementById('toggleTimerBtn');
+      const resetBtn = document.getElementById('resetTimerBtn');
+      const presetBtns = document.querySelectorAll('.preset-btn');
+
+      let totalSeconds = 25 * 60;
+      let remainingSeconds = totalSeconds;
+      let timerId = null;
+
+      function render() {
+        const mins = Math.floor(remainingSeconds / 60);
+        const secs = remainingSeconds % 60;
+        display.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        const pct = totalSeconds > 0 ? (remainingSeconds / totalSeconds) * 100 : 0;
+        ring.style.setProperty('--progress', pct.toFixed(2));
+      }
+
+      function stopTimer() {
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        toggleBtn.textContent = remainingSeconds === totalSeconds ? 'Start Focus' : 'Resume';
+      }
+
+      toggleBtn.addEventListener('click', function () {
+        if (timerId !== null) {
+          stopTimer();
+          return;
+        }
+        if (remainingSeconds === 0) {
+          remainingSeconds = totalSeconds;
+        }
+        toggleBtn.textContent = 'Pause';
+        timerId = setInterval(function () {
+          if (remainingSeconds > 0) {
+            remainingSeconds -= 1;
+            render();
+          }
+          if (remainingSeconds === 0) {
+            stopTimer();
+            toggleBtn.textContent = 'Restart';
+          }
+        }, 1000);
+      });
+
+      resetBtn.addEventListener('click', function () {
+        stopTimer();
+        remainingSeconds = totalSeconds;
+        toggleBtn.textContent = 'Start Focus';
+        render();
+      });
+
+      presetBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          presetBtns.forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          stopTimer();
+          totalSeconds = Number(btn.getAttribute('data-minutes')) * 60;
+          remainingSeconds = totalSeconds;
+          label.textContent = btn.getAttribute('data-label') || 'Deep Work';
+          toggleBtn.textContent = 'Start Focus';
+          render();
+        });
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
